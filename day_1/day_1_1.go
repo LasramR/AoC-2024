@@ -20,7 +20,7 @@ func min_max(a, b int) (int, int) {
 
 func Total_distance(l1, l2 []int) (int, error) {
 	if len(l1) != len(l2) {
-		return -1, errors.New("total_distance: input lists must have the same length")
+		return -1, errors.New("Total_distance: input lists must have the same length")
 	}
 
 	item_count := len(l1)

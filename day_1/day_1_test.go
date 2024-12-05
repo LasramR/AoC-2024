@@ -11,8 +11,8 @@ import (
 	"github.com/LasramR/AoC-2024/day_1"
 )
 
-func TestTotal_Distance(t *testing.T) {
-	fd, err := os.Open("day_1_1_input.txt")
+func Get_input(t *testing.T) ([]int, []int) {
+	fd, err := os.Open("day_1_input.txt")
 	if err != nil {
 		t.Fatalf("could not open input file")
 	}
@@ -36,11 +36,29 @@ func TestTotal_Distance(t *testing.T) {
 		l2 = append(l2, l2_value)
 	}
 
+	return l1, l2
+}
+
+func TestTotal_Distance(t *testing.T) {
+	l1, l2 := Get_input(t)
+
 	distance, err := day_1.Total_distance(l1, l2)
 
 	if err != nil {
 		t.Fatalf("Total_distance should not have failed")
 	}
 
-	t.Log(distance)
+	t.Log("Total_distance=", distance)
+}
+
+func TestTotal_Similarity(t *testing.T) {
+	l1, l2 := Get_input(t)
+
+	similarity, err := day_1.Total_similarity(l1, l2)
+
+	if err != nil {
+		t.Fatalf("Total_similarity should not have failed")
+	}
+
+	t.Log("Total_similarity=", similarity)
 }
