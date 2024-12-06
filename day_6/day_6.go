@@ -8,8 +8,6 @@ const (
 	GUARD_DOWN              rune = 'v'
 	GUARD_RIGHT             rune = '>'
 	GUARD_LEFT              rune = '<'
-	GUARD_V_PATH            rune = '|'
-	GUARD_H_PATH            rune = '-'
 )
 
 func get_guard_position(district_layout [][]rune) (int, int, rune) {
@@ -58,8 +56,8 @@ func next_guard_move(district_layout [][]rune, guard_i, guard_j int, guard_facin
 	return guard_i, guard_j - 1, GUARD_LEFT
 }
 
-func is_guard_looping(district_layout [][]rune, guard_i, guard_j int) bool {
-	return district_layout[guard_i][guard_j] == GUARD_H_PATH || district_layout[guard_i][guard_j] == GUARD_V_PATH
+func is_guard_looping(district_layout [][]rune, guard_i, guard_j int, guard_facing rune) bool {
+	return district_layout[guard_i][guard_j] == guard_facing
 }
 
 func visit_next_district_cell(district_layout [][]rune, guard_i, guard_j int, guard_facing rune, only_visit bool) (int, int, rune, bool) {
@@ -70,12 +68,7 @@ func visit_next_district_cell(district_layout [][]rune, guard_i, guard_j int, gu
 		already_visited = district_layout[next_guard_i][next_guard_j] == VISITED_DISTRICT_CELL
 		district_layout[guard_i][guard_j] = VISITED_DISTRICT_CELL
 	} else {
-		already_visited = is_guard_looping(district_layout, next_guard_i, next_guard_j)
-		if guard_facing == GUARD_DOWN || guard_facing == GUARD_UP {
-			district_layout[guard_i][guard_j] = GUARD_V_PATH
-		} else {
-			district_layout[guard_i][guard_j] = GUARD_H_PATH
-		}
+		already_visited = is_guard_looping(district_layout, next_guard_i, next_guard_j, next_guard_facing)
 	}
 
 	district_layout[next_guard_i][next_guard_j] = next_guard_facing
@@ -116,12 +109,11 @@ func Count_visited_district_position(district_layout [][]rune) int {
 }
 
 func copy_district(district_layout [][]rune) [][]rune {
-	district_copy := [][]rune{}
-	for i := 0; i < len(district_layout); i++ {
-		line_copy := append([]rune{}, district_layout[i]...)
-		district_copy = append(district_copy, line_copy)
+	district_copy := make([][]rune, len(district_layout))
+	for i := range district_layout {
+		district_copy[i] = make([]rune, len(district_layout[i]))
+		copy(district_copy[i], district_layout[i])
 	}
-
 	return district_copy
 }
 
@@ -129,34 +121,33 @@ func Count_number_of_possible_loop_in_district(district_layout [][]rune) int {
 	possible_loop_count := 0
 
 	initial_guard_i, initial_guard_j, initial_guard_facing := get_guard_position(district_layout)
-	visited_cell_count := Count_visited_district_position(district_layout) - 1
 
+	total_steps := Count_visited_district_position(copy_district(district_layout))
 	prev_guard_facing := initial_guard_facing
-	for prev_guard_facing != initial_guard_facing {
-		initial_guard_i, initial_guard_j, initial_guard_facing = next_guard_move(district_layout, initial_guard_i, initial_guard_j, initial_guard_facing)
-		visited_cell_count -= 1
+
+	for prev_guard_facing == initial_guard_facing {
+		initial_guard_i, initial_guard_j, initial_guard_facing, _ = visit_next_district_cell(district_layout, initial_guard_i, initial_guard_j, initial_guard_facing, false)
+		total_steps -= 1
 	}
 
-	for i := 0; i < visited_cell_count; i++ {
+	for i := 0; i < total_steps; i++ {
 		district_copy := copy_district(district_layout)
-		new_obstruction_i, new_obstruction_j, already_obstructed := next_guard_move(district_copy, initial_guard_i, initial_guard_j, initial_guard_facing)
 
-		if initial_guard_facing == already_obstructed {
-			district_copy[new_obstruction_i][new_obstruction_j] = OBSTRUCTED_CELL
+		new_obstruction_i, new_obstruction_j, _ := next_guard_move(district_copy, initial_guard_i, initial_guard_j, initial_guard_facing)
+		district_copy[new_obstruction_i][new_obstruction_j] = OBSTRUCTED_CELL
 
-			guard_i, guard_j, guard_facing := initial_guard_i, initial_guard_j, initial_guard_facing
-			is_looping := false
-			for !is_guard_leaving_next_step(district_copy, guard_i, guard_j, guard_facing) {
+		guard_i, guard_j, guard_facing := initial_guard_i, initial_guard_j, initial_guard_facing
+		is_looping := false
+		for !is_guard_leaving_next_step(district_copy, guard_i, guard_j, guard_facing) {
 
-				guard_i, guard_j, guard_facing, is_looping = visit_next_district_cell(district_copy, guard_i, guard_j, guard_facing, false)
-				if is_looping {
-					possible_loop_count += 1
-					break
-				}
+			guard_i, guard_j, guard_facing, is_looping = visit_next_district_cell(district_copy, guard_i, guard_j, guard_facing, false)
+			if is_looping {
+				possible_loop_count += 1
+				break
 			}
 		}
 
-		initial_guard_i, initial_guard_j, initial_guard_facing = next_guard_move(district_layout, initial_guard_i, initial_guard_j, initial_guard_facing)
+		initial_guard_i, initial_guard_j, initial_guard_facing, _ = visit_next_district_cell(district_layout, initial_guard_i, initial_guard_j, initial_guard_facing, false)
 	}
 
 	return possible_loop_count
