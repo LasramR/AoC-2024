@@ -44,8 +44,14 @@ func Get_input(t *testing.T) [][]int {
 	return reports
 }
 
-func TestCount_safe_reports(t *testing.T) {
+func TestCount_safe_reports_No_dampener(t *testing.T) {
 	reports := Get_input(t)
 
-	t.Log("safe record count=", day_2.Count_safe_reports(reports))
+	t.Log("safe record count (no dampener) =", day_2.Count_safe_reports(reports, 0))
+}
+
+func TestCount_safe_reports_1_unsafe_level(t *testing.T) {
+	reports := Get_input(t)
+
+	t.Log("safe record count (dampener set to 1 level) =", day_2.Count_safe_reports(reports, 1))
 }
