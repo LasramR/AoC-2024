@@ -31,3 +31,8 @@ func TestCount_word_frequency_in_matrix(t *testing.T) {
 
 	t.Log("XMAS Count=", day_4.Count_word_frequency_in_matrix(matrix, []rune("XMAS")))
 }
+
+func TestCount_X_word_frequency_in_matrix(t *testing.T) {
+	matrix := Get_input(t)
+	t.Log("X-MAS Count=", day_4.Count_X_word_frequency_in_matrix(matrix, []rune("MAS")))
+}
